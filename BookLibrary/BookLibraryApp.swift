@@ -16,4 +16,8 @@ struct BookLibraryApp: App {
                 .modelContainer(for: [Author.self, Book.self])
         }
     }
+    init() {
+        print(URL.applicationSupportDirectory
+            .path(percentEncoded: false))
+    }
 }
