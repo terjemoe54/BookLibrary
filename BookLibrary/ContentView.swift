@@ -103,15 +103,88 @@ struct ContentView: View {
         modelContext.delete(author)
         try? modelContext.save()
     }
-    
-}
+ }
 
 
 struct EditAuthorView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+    
     @Bindable var author: Author
+    @State private var newBookTitle = ""
     
     var body: some View {
-        Text("EditAuthorView")
+        NavigationStack {
+            Form {
+                Section("Edit Author") {
+                    ValidatedTextField(
+                        prompt: "Author Name",
+                        text: $author.name,
+                        errorMsg: "Invalid Author Name"
+                    )
+                }
+            
+                if author.name.count >= 2 {
+                    Section("Add Book") {
+                     ValidatedTextField(
+                          prompt: "Book Name",
+                          text: $newBookTitle,
+                          errorMsg: "Invalid Title"
+                      )
+                        
+                        Button("Add Book") {
+                            if newBookTitle.count >= 2 {
+                                // Create a new book
+                                let newBook = Book(
+                                    title: newBookTitle,
+                                    author: author.name
+                                )
+                                
+                                    modelContext.insert(newBook)
+                                    author.books.append(newBook)
+                                
+                                // Persist
+                                try? modelContext.save()
+                                
+                                newBookTitle = ""
+                            }
+                        }
+                        .disabled(newBookTitle.count < 2)
+                        
+                        if !author.books.isEmpty {
+                            Section("Books") {
+                                ForEach(author.books) { book in
+                                    Text(book.title)
+                                        .swipeActions {
+                                            Button(
+                                                role: .destructive) {
+                                                    // delete book
+                                                    deleteBook(book)
+                                                } label: {
+                                                    Label("Delete", systemImage: "trash")
+                                                }
+                                        }
+                                }
+                            }
+                        }
+                        
+                    }
+                }
+                
+            }
+            .navigationTitle("Edit Author")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") { dismiss() }
+                        .disabled(author.books.isEmpty)
+                }
+            }
+        }
+    }
+    
+    private func deleteBook(_ book: Book) {
+        modelContext.delete(book)
+        try? modelContext.save()
     }
 }
 
