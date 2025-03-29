@@ -33,7 +33,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                if !sortedAuthors.isEmpty {
+                if sortedAuthors.isEmpty {
                     EmptyAuthorsView()
                 } else {
                     Picker(
@@ -57,23 +57,24 @@ struct ContentView: View {
                                             simpleUpdateBook(book)
                                         }
                                     }
+                                    .swipeActions {
+                                        Button(role: .destructive) {
+                                           deleteBook(book)
+                                        } label:  {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                        
+                                        Button {
+                                            // edit
+                                            simpleUpdateBook(book)
+                                        } label:  {
+                                            Label("Edit", systemImage: "pencil")
+                                        }
+                                        .tint(.blue)
+                                    }
                                 }
                             }
-                            .swipeActions {
-                                Button(role: .destructive) {
-                                    // delete author
-                                    deleteAuthor(author)
-                                } label:  {
-                                    Label("Delete", systemImage: "trash")
-                                }
-                                
-                                Button {
-                                    // edit
-                                } label:  {
-                                    Label("Edit", systemImage: "pencil")
-                                }
-                                .tint(.blue)
-                            }
+                          
                         }
                     }
                 }
@@ -83,7 +84,6 @@ struct ContentView: View {
                 Button("➕ Add") {
                     selectedAuthor = Author(name: "")
                     isPresented = true
-                    print(isPresented)
                 }
             }
             .sheet(isPresented: $isPresented) { [selectedAuthor] in
@@ -101,10 +101,16 @@ struct ContentView: View {
         try? modelContext.save()
     }
     
-    func deleteAuthor(_ author: Author) {
-        modelContext.delete(author)
+//    func deleteAuthor(_ author: Author) {
+//        modelContext.delete(author)
+//        try? modelContext.save()
+//    }
+    
+    private func deleteBook(_ book: Book) {
+        modelContext.delete(book)
         try? modelContext.save()
     }
+    
  }
 
 
@@ -153,23 +159,23 @@ struct EditAuthorView: View {
                         }
                         .disabled(newBookTitle.count < 2)
                         
-                        if !author.books.isEmpty {
-                            Section("Books") {
-                                ForEach(author.books) { book in
-                                    Text(book.title)
-                                        .swipeActions {
-                                            Button(
-                                                role: .destructive) {
-                                                    // delete book
-                                                    deleteBook(book)
-                                                } label: {
-                                                    Label("Delete", systemImage: "trash")
-                                                }
-                                        }
-                                }
+                    }
+                    
+                    if !author.books.isEmpty {
+                        Section("Books") {
+                            ForEach(author.books) { book in
+                                Text(book.title)
+                                    .swipeActions {
+                                        Button(
+                                            role: .destructive) {
+                                                // delete book
+                                                deleteBook(book)
+                                            } label: {
+                                                Label("Delete", systemImage: "trash")
+                                            }
+                                    }
                             }
                         }
-                        
                     }
                 }
                 
