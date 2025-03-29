@@ -24,7 +24,7 @@ struct ContentView: View {
   
     @State private var selectedAuthor: Author?
     @State private var isEditingAuthor = false
-    @State private var isSheetingPresented = false
+    @State private var isPresented = false
         
     enum SortOption {
         case forward, reverse
@@ -81,14 +81,16 @@ struct ContentView: View {
             .navigationTitle("Authors & Books")
             .toolbar {
                 Button("➕ Add") {
-    //                selectedAuthor = Author(name: "")
-                    selectedAuthor = Author(name: "TEST NAME")
-                    isSheetingPresented = true
+                    selectedAuthor = Author(name: "")
+                    isPresented = true
+                    print(isPresented)
                 }
             }
-            .sheet(isPresented: $isSheetingPresented) {
+            .sheet(isPresented: $isPresented) { [selectedAuthor] in
                 if let author = selectedAuthor {
                     EditAuthorView(author: author)
+                } else {
+                    Text("Something is off?")
                 }
             }
         }
